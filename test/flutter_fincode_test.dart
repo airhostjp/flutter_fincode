@@ -1,3 +1,6 @@
+import 'package:flutter_fincode/models/fincode_card_details.dart';
+import 'package:flutter_fincode/models/fincode_card_info_result.dart';
+import 'package:flutter_fincode/models/fincode_register_card_result.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_fincode/flutter_fincode.dart';
 import 'package:flutter_fincode/flutter_fincode_platform_interface.dart';
@@ -12,13 +15,10 @@ class MockFlutterFincodePlatform
   Future<String?> getPlatformVersion() => Future.value('42');
 
   @override
-  Future<dynamic> payment(Map<String, String> data) => Future.value();
+  Future<FincodeCardInfoResult> cardInfoList(String customerId) => Future.value(FincodeCardInfoResult());
 
   @override
-  Future<dynamic> cardInfoList(String customerId) => Future.value();
-
-  @override
-  Future<dynamic> registerCard(Map<String, String> data) => Future.value();
+  Future<FincodeRegisterCardResult> registerCard(FincodeCardDetails card) => Future.value(FincodeRegisterCardResult());
 
   @override
   Future<void> showPaymentSheet() => Future.value();
@@ -32,7 +32,7 @@ void main() {
   });
 
   test('getPlatformVersion', () async {
-    FlutterFincode flutterFincodePlugin = FlutterFincode();
+    FlutterFincode flutterFincodePlugin = FlutterFincode.instance;
     MockFlutterFincodePlatform fakePlatform = MockFlutterFincodePlatform();
     FlutterFincodePlatform.instance = fakePlatform;
 

@@ -1,3 +1,6 @@
+import 'package:flutter_fincode/models/fincode_card_details.dart';
+import 'package:flutter_fincode/models/fincode_card_info_result.dart';
+import 'package:flutter_fincode/models/fincode_register_card_result.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
 import 'flutter_fincode_method_channel.dart';
@@ -27,15 +30,11 @@ abstract class FlutterFincodePlatform extends PlatformInterface {
     throw UnimplementedError('platformVersion() has not been implemented.');
   }
 
-  Future<void> payment(Map<String, String> data) {
-    throw UnimplementedError('payment() has not been implemented.');
-  }
-
-  Future<dynamic> cardInfoList(String customerId) {
+  Future<FincodeCardInfoResult> cardInfoList(String customerId) {
     throw UnimplementedError('cardInfoList() has not been implemented.');
   }
 
-  Future<dynamic> registerCard(Map<String, String> data) {
+  Future<FincodeRegisterCardResult> registerCard(FincodeCardDetails card) {
     throw UnimplementedError('registerCard() has not been implemented.');
   }
 

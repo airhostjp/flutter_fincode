@@ -4,6 +4,10 @@ import 'dart:async';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_fincode/flutter_fincode.dart';
+import 'package:flutter_fincode/models/fincode_card_details.dart';
+import 'package:flutter_fincode/models/fincode_card_info_result.dart';
+import 'package:flutter_fincode/models/fincode_credit_card.dart';
+import 'package:flutter_fincode/models/fincode_register_card_result.dart';
 import 'package:flutter_fincode_example/loading_button.dart';
 
 const String customerId = 'c_Ux3mjHkYROq44oNZyS-3aA';
@@ -30,11 +34,7 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   String _platformVersion = 'Unknown';
-
-  String? _cardId;
-
-  final List<Map<String, dynamic>> cardList = [];
-  final FlutterFincode _flutterFincodePlugin = FlutterFincode();
+  final List<FincodeCreditCard> cardList = [];
 
   @override
   void initState() {
@@ -44,23 +44,20 @@ class _MyAppState extends State<MyApp> {
 
   // Platform messages are asynchronous, so we initialize in an async method.
   Future<void> initData() async {
-    dynamic cardListInfo;
     String platformVersion;
     // Platform messages may fail, so we use a try/catch PlatformException.
     // We also handle the message potentially returning null.
     try {
-      platformVersion = await _flutterFincodePlugin.getPlatformVersion() ??
-          'Unknown platform version';
-      cardListInfo =
-          await _flutterFincodePlugin.cardInfoList(customerId);
+      FlutterFincode.publishableKey = 'm_test_NmQzMWQ5ZDQtYzM3My00ZTZiLWI1MzEtZmY2N2U4YTlhOTJlYWE0ZmI5OTQtNDZlMi00ZmY0LWE2MWQtN2RhMTY3NjJmZmMwc18yNDAyMDU5MzA1Ng';
+      FlutterFincode.tenantShopId = 's_24020521229';
+      platformVersion = await FlutterFincode.instance.getPlatformVersion() ?? 'Unknown platform version';
+      FincodeCardInfoResult result = await FlutterFincode.instance.cardInfoList(customerId);
+      if (result.success) {
+        cardList.clear();
+        cardList.addAll(result.data ?? []);
+      }
     } on PlatformException {
       platformVersion = 'Failed to get platform version.';
-    }
-    if (cardListInfo != null && cardListInfo is Map) {
-      final List<dynamic> cards = cardListInfo['data'];
-      for (final dynamic card in cards) {
-        cardList.add(card.cast<String, dynamic>());
-      }
     }
 
     // If the widget was removed from the tree while the asynchronous platform
@@ -74,20 +71,12 @@ class _MyAppState extends State<MyApp> {
   }
 
   Future<void> getCardList() async {
-    dynamic cardListInfo;
-    try {
-      cardListInfo = await _flutterFincodePlugin.cardInfoList(customerId);
-    } on PlatformException {
-      cardListInfo = null;
+    FincodeCardInfoResult result = await FlutterFincode.instance.cardInfoList(customerId);
+    if (result.success) {
+      cardList.clear();
+      cardList.addAll(result.data ?? []);
+      setState(() {});
     }
-    cardList.clear();
-    if (cardListInfo != null && cardListInfo is Map) {
-      final List<dynamic> cards = cardListInfo['data'];
-      for (final dynamic card in cards) {
-        cardList.add(card.cast<String, dynamic>());
-      }
-    }
-    setState(() {});
   }
 
   @override
@@ -127,7 +116,7 @@ class _MyAppState extends State<MyApp> {
                     ),
                   ),
                 ),
-                for (final Map<String, dynamic> card in cardList)
+                for (final FincodeCreditCard card in cardList)
                   Card(
                     elevation: 0.5,
                     margin: const EdgeInsets.only(bottom: 12),
@@ -142,21 +131,25 @@ class _MyAppState extends State<MyApp> {
                             color: Theme.of(context).colorScheme.outlineVariant),
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      title: Text('${card['brand']}  ${card['cardNo']}'),
+                      title: Text('${card.brand}  ${card.cardNo}'),
                       expandedCrossAxisAlignment: CrossAxisAlignment.stretch,
                       childrenPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                       children: [
-                        Text('Card ID: ${card['id']}'),
-                        Text('Expire: ${card['expire']}'),
-                        Text('Holder Name: ${card['holderName']}'),
+                        Text('Card ID: ${card.id}'),
+                        Text('Expire: ${card.expire}'),
+                        Text('Holder Name: ${card.holderName}'),
                         const SizedBox(height: 10),
                         TextButton.icon(
                           label: const Text('Copy Card ID'),
                           icon: const Icon(Icons.paste_outlined),
                           onPressed: () async {
-                            setState(() {
-                              _cardId = card['id'];
-                            });
+                            await Clipboard.setData(ClipboardData(text: card.id));
+                            if (!mounted) return;
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Card ID copied to clipboard'),
+                              ),
+                            );
                           },
                         ),
                       ],
@@ -175,18 +168,6 @@ class _MyAppState extends State<MyApp> {
                 ),
                 CardInfoForm(onAdded: getCardList),
                 const SizedBox(height: 10),
-                Container(
-                  alignment: Alignment.centerLeft,
-                  padding: const EdgeInsets.only(bottom: 8),
-                  child: Text(
-                    'Payment:',
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleLarge
-                        ?.copyWith(fontWeight: FontWeight.w600),
-                  ),
-                ),
-                PaymentWidget(cardId: _cardId),
                 Text('Running on: $_platformVersion\n'),
                 const SizedBox(height: 80),
               ],
@@ -195,13 +176,40 @@ class _MyAppState extends State<MyApp> {
           floatingActionButton: FloatingActionButton(
             onPressed: () async {
               final dynamic response =
-                  await _flutterFincodePlugin.showPaymentSheet();
+                  await FlutterFincode.instance.showPaymentSheet();
               if (!mounted) return;
               showAlert(context, response);
             },
             tooltip: 'Make Payment',
             child: const Icon(Icons.shopping_bag),
           )),
+    );
+  }
+
+  void showAlert(BuildContext context, dynamic response) {
+    final bool success = response['status'] == 'success';
+    final String message;
+    if (success) {
+      message = 'Execution successful!\n ID: ${response['id']}';
+    } else {
+      message = 'code: ${response['code']}\nmessage: ${response['message']}';
+    }
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(success ? 'Success' : 'Error'),
+          content: Text(message),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
     );
   }
 }
@@ -224,8 +232,6 @@ class _CardInfoFormState extends State<CardInfoForm> {
   final bool canEdit = true;
 
   final GlobalKey _formKey = GlobalKey<FormState>();
-
-  final FlutterFincode _flutterFincodePlugin = FlutterFincode();
 
   @override
   void dispose() {
@@ -277,8 +283,7 @@ class _CardInfoFormState extends State<CardInfoForm> {
               Expanded(
                 child: TextFormField(
                   controller: _expiryDateController,
-                  decoration:
-                      _inputDecoration(labelText: 'Expiry Date (YY/MM)'),
+                  decoration: _inputDecoration(labelText: 'Expiry Date (YY/MM)'),
                   autovalidateMode: AutovalidateMode.onUserInteraction,
                   inputFormatters: <TextInputFormatter>[
                     FilteringTextInputFormatter.digitsOnly,
@@ -333,17 +338,15 @@ class _CardInfoFormState extends State<CardInfoForm> {
                   print("Expiry Date: ${_expiryDateController.text}");
                   print("Security Code: ${_securityCodeController.text}");
                 }
-                Map<String, String> cardInfo = {
-                  'customerId': customerId,
-                  'holderName': _nameController.text,
-                  'cardNo': _cardNumberController.text,
-                  'expire': _expiryDateController.text,
-                  'securityCode': _securityCodeController.text,
-                };
-                final dynamic response =
-                    await _flutterFincodePlugin.registerCard(cardInfo);
-                final bool success = response['status'] == 'success';
-                if (success) {
+                FincodeCardDetails card = FincodeCardDetails(
+                  customerId: customerId,
+                  holderName: _nameController.text,
+                  cardNo: _cardNumberController.text,
+                  expire: _expiryDateController.text,
+                  securityCode: _securityCodeController.text,
+                );
+                final FincodeRegisterCardResult result = await FlutterFincode.instance.registerCard(card);
+                if (result.success) {
                   _nameController.clear();
                   _cardNumberController.clear();
                   _expiryDateController.clear();
@@ -351,7 +354,23 @@ class _CardInfoFormState extends State<CardInfoForm> {
                   widget.onAdded?.call();
                 }
                 if (!mounted) return;
-                showAlert(context, response);
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: Text(result.success ? 'Success' : 'Error'),
+                      content: Text(result.message ?? ''),
+                      actions: <Widget>[
+                        TextButton(
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                          child: const Text('OK'),
+                        ),
+                      ],
+                    );
+                  },
+                );
               },
               child: const Text('Submit'),
             ),
@@ -378,76 +397,4 @@ class _CardInfoFormState extends State<CardInfoForm> {
       contentPadding: const EdgeInsets.all(16),
     );
   }
-}
-
-class PaymentWidget extends StatelessWidget {
-  const PaymentWidget({super.key, this.cardId});
-
-  final String? cardId;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisAlignment: MainAxisAlignment.start,
-      children: <Widget>[
-        const Text('payType: Card'),
-        const Text('id: $orderId'),
-        const Text('accessId: $accessId'),
-        const Text('customerId: $customerId'),
-        Text('CardId: ${cardId ?? 'None'}'),
-        const Text('method: 1'),
-        Container(
-          margin: const EdgeInsets.symmetric(vertical: 16.0),
-          width: double.infinity,
-          height: 48,
-          child: LoadingButton(
-            onPressed: () async {
-              final FlutterFincode flutterFincodePlugin = FlutterFincode();
-              FocusScope.of(context).unfocus();
-              // Implement submission logic
-              Map<String, String> paymentInfo = {
-                'payType': 'Card',
-                'id': orderId,
-                'accessId': accessId,
-                'customerId': customerId,
-                'cardId': cardId ?? '',
-                'method': '1',
-              };
-              final dynamic response = await flutterFincodePlugin.payment(paymentInfo);
-              showAlert(context, response);
-            },
-            child: const Text('Pay'),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-void showAlert(BuildContext context, dynamic response) {
-  final bool success = response['status'] == 'success';
-  final String message;
-  if (success) {
-    message = 'Execution successful!\n ID: ${response['id']}';
-  } else {
-    message = 'code: ${response['code']}\nmessage: ${response['message']}';
-  }
-  showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        title: Text(success ? 'Success' : 'Error'),
-        content: Text(message),
-        actions: <Widget>[
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-            child: const Text('OK'),
-          ),
-        ],
-      );
-    },
-  );
 }
