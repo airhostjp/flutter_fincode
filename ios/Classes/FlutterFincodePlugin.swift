@@ -135,11 +135,11 @@ public class FlutterFincodePlugin: NSObject, FlutterPlugin, UIViewControllerTran
     }
     
     func getHeader(_ data: [String: Any]) -> [String : String] {
-        let publishableKey = data["publishableKey"] ?? ""
+        let publicKey = data["publicKey"] ?? ""
         let tenantShopId = data["tenantShopId"] ?? ""
         return [
             "Content-Type": "application/json",
-            "Authorization":"Bearer \(publishableKey)",
+            "Authorization":"Bearer \(publicKey)",
             "Tenant-Shop-Id": "\(tenantShopId)",
         ]
     }

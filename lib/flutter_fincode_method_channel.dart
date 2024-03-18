@@ -22,7 +22,7 @@ class MethodChannelFlutterFincode extends FlutterFincodePlatform {
   @override
   Future<FincodeCardInfoResult> cardInfoList(String customerId) async {
     final dynamic result = await methodChannel.invokeMethod<dynamic>('cardInfoList', {
-      'publishableKey': FlutterFincode.publishableKey,
+      'publicKey': FlutterFincode.publicKey,
       'tenantShopId': FlutterFincode.tenantShopId,
       'customerId': customerId,
     });
@@ -32,7 +32,7 @@ class MethodChannelFlutterFincode extends FlutterFincodePlatform {
   @override
   Future<FincodeRegisterCardResult> registerCard(FincodeCardDetails card) async {
     final dynamic result = await methodChannel.invokeMethod<dynamic>('registerCard', {
-      'publishableKey': FlutterFincode.publishableKey,
+      'publishableKey': FlutterFincode.publicKey,
       'tenantShopId': FlutterFincode.tenantShopId,
       'params': card.toJson(),
     });

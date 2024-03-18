@@ -9,12 +9,16 @@ Pod::Spec.new do |s|
   s.description      = <<-DESC
 A plug-in to add support for Fincode payments on Flutter applications.
                        DESC
-  s.homepage         = 'http://example.com'
+  s.homepage         = 'https://github.com/airhostjp'
   s.license          = { :file => '../LICENSE' }
-  s.author           = { 'Your Company' => 'email@example.com' }
+  s.author           = { 'AirHost' => 'mobile@airhost.jp' }
   s.source           = { :path => '.' }
-  # The Prod environment needs to modify the path: Frameworks/Release/FincodeSDK.xcframework
-  s.ios.vendored_frameworks = 'Frameworks/Debug/FincodeSDK.xcframework'
+  # Modify the Fincode SDK path according to the current environment
+  if ENV['APP_ENV'] == 'Stage'
+    s.ios.vendored_frameworks = 'Frameworks/Debug/FincodeSDK.xcframework'
+  else
+    s.ios.vendored_frameworks = 'Frameworks/Release/FincodeSDK.xcframework'
+  end
   s.vendored_frameworks = 'FincodeSDK.xcframework'
   s.source_files = 'Classes/**/*'
   s.dependency 'Flutter'

@@ -10,11 +10,11 @@ class FlutterFincode {
 
   FlutterFincode._();
 
-  static set publishableKey(String value) {
-    if (value == instance._publishableKey) {
+  static set publicKey(String value) {
+    if (value == instance._publicKey) {
       return;
     }
-    instance._publishableKey = value;
+    instance._publicKey = value;
   }
 
   static set tenantShopId(String value) {
@@ -25,11 +25,11 @@ class FlutterFincode {
   }
 
   /// Retrieves the publishable API key.
-  static String get publishableKey {
-    if (instance._publishableKey == null) {
+  static String get publicKey {
+    if (instance._publicKey == null) {
       throw const FincodeConfigException('Publishable key is not set');
     }
-    return instance._publishableKey!;
+    return instance._publicKey!;
   }
 
   /// Retrieves the tenant shop ID.
@@ -42,7 +42,7 @@ class FlutterFincode {
 
   static final FlutterFincode instance = FlutterFincode._();
 
-  String? _publishableKey;
+  String? _publicKey;
   String? _tenantShopId;
 
   Future<String?> getPlatformVersion() {
