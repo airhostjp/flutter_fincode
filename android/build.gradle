@@ -72,7 +72,11 @@ task useAar {
     File file = project.file("libs/stage")
     String dartDefines = ''
     if (project.hasProperty('dart-defines')) {
-        dartDefines = new String(project.property('dart-defines').decodeBase64(), 'UTF-8').replaceAll(' ', '').toUpperCase()
+        try {
+            dartDefines = new String(project.property('dart-defines').decodeBase64(), 'UTF-8').replaceAll(' ', '').toUpperCase()
+        } catch (Exception e) {
+            e.printStackTrace()
+        }
     }
     boolean isProd = dartDefines.contains("APP_ENV=PROD")
     if (isProd) {

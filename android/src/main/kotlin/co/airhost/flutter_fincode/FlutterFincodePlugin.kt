@@ -30,7 +30,7 @@ class FlutterFincodePlugin : FlutterPlugin, MethodCallHandler {
 
     override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: Result) {
         val errorInfo = mapOf(
-            "status" to false,
+            "status" to "failed",
             "message" to "Parameter error.",
             "code" to -1,
         )
@@ -76,7 +76,7 @@ class FlutterFincodePlugin : FlutterPlugin, MethodCallHandler {
                         )
                     }
                     result.success(mapOf(
-                        "status" to true,
+                        "success" to true,
                         "message" to "successfully obtained.",
                         "data" to cardList
                     ))
@@ -105,7 +105,7 @@ class FlutterFincodePlugin : FlutterPlugin, MethodCallHandler {
             object : FincodeCallback<FincodeCardRegisterResponse> {
                 override fun onResponse(response: FincodeCardRegisterResponse) {
                     result.success(mapOf(
-                        "status" to true,
+                        "success" to true,
                         "message" to "Registered successfully.",
                         "data" to mapOf(
                             "id" to response.cardId,
@@ -137,7 +137,7 @@ class FlutterFincodePlugin : FlutterPlugin, MethodCallHandler {
 
     private fun getFailureResult(error: FincodeErrorResponse): Map<String, *> {
         return mapOf(
-            "status" to false,
+            "success" to false,
             "message" to (error.errorInfo.list.firstOrNull()?.message ?: ""),
             "code" to error.statusCode
         )
