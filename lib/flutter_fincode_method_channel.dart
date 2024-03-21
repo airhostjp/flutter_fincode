@@ -1,5 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_fincode/flutter_fincode.dart';
+import 'package:flutter_fincode/models/fincode_card_details.dart';
+import 'package:flutter_fincode/models/fincode_card_info_result.dart';
+import 'package:flutter_fincode/models/fincode_register_card_result.dart';
 
 import 'flutter_fincode_platform_interface.dart';
 
@@ -16,18 +20,23 @@ class MethodChannelFlutterFincode extends FlutterFincodePlatform {
   }
 
   @override
-  Future<dynamic> payment(Map<String, String> data) async {
-    return await methodChannel.invokeMethod<dynamic>('payment', data);
+  Future<FincodeCardInfoResult> cardInfoList(String customerId) async {
+    final dynamic result = await methodChannel.invokeMethod<dynamic>('cardInfoList', {
+      'publicKey': FlutterFincode.publicKey,
+      'tenantShopId': FlutterFincode.tenantShopId,
+      'customerId': customerId,
+    });
+    return FincodeCardInfoResult.fromJson(result.cast<String, dynamic>());
   }
 
   @override
-  Future<dynamic> cardInfoList(String customerId) async {
-    return await methodChannel.invokeMethod<dynamic>('cardInfoList', customerId);
-  }
-
-  @override
-  Future<dynamic> registerCard(Map<String, String> data) async {
-    return await methodChannel.invokeMethod<dynamic>('registerCard', data);
+  Future<FincodeRegisterCardResult> registerCard(FincodeCardDetails card) async {
+    final dynamic result = await methodChannel.invokeMethod<dynamic>('registerCard', {
+      'publishableKey': FlutterFincode.publicKey,
+      'tenantShopId': FlutterFincode.tenantShopId,
+      'params': card.toJson(),
+    });
+    return FincodeRegisterCardResult.fromJson(result.cast<String, dynamic>());
   }
 
   @override
