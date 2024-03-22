@@ -2,10 +2,4 @@
     package="co.airhost.flutter_fincode">
 
     <uses-permission android:name="android.permission.INTERNET" />
-
-    <application>
-        <activity
-            android:name=".PaymentActivity"
-            android:theme="@style/Theme.AppCompat.DayNight" />
-    </application>
 </manifest>

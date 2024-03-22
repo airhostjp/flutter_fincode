@@ -50,7 +50,7 @@ class _MyAppState extends State<MyApp> {
     try {
       FlutterFincode.publicKey = 'm_test_NmQzMWQ5ZDQtYzM3My00ZTZiLWI1MzEtZmY2N2U4YTlhOTJlYWE0ZmI5OTQtNDZlMi00ZmY0LWE2MWQtN2RhMTY3NjJmZmMwc18yNDAyMDU5MzA1Ng';
       FlutterFincode.tenantShopId = 's_24020521229';
-      platformVersion = await FlutterFincode.instance.getPlatformVersion() ?? 'Unknown platform version';
+      platformVersion = 'Unknown platform version';
       FincodeCardInfoResult result = await FlutterFincode.instance.cardInfoList(customerId);
       if (result.success) {
         cardList.clear();
