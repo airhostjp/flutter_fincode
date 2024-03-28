@@ -36,4 +36,11 @@ class FincodeCreditCard {
       'brand': brand,
     };
   }
+
+  Map<String, dynamic> get cardParams {
+    return {
+      'fincode_card_id': id,
+      'fincode_customer_id': customerId,
+    };
+  }
 }
