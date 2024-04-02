@@ -53,18 +53,24 @@ android {
 
 dependencies {
     String dartDefines = ''
+    String appEnv = ''
+    System.getenv().each { k, v ->
+        if (k == 'APP_ENV') {
+            appEnv = v
+        }
+    }
     if (project.hasProperty('dart-defines')) {
         try {
             dartDefines = new String(project.property('dart-defines').decodeBase64(), 'UTF-8').replaceAll(' ', '').toUpperCase()
         } catch (Exception e) {
         }
     }
-    boolean isProd = dartDefines.contains("APP_ENV=PROD")
-    println('dart-defines: ' + dartDefines + ', isProd: ' + isProd)
-    if (isProd) {
-        implementation files('libs/prod.jar')
-    } else {
+    boolean isStage = dartDefines.contains("APP_ENV=STAGE") || appEnv.toUpperCase() == 'STAGE'
+    println('Fincode Env: ' + (isStage ? 'Stage' : 'Prod'))
+    if (isStage) {
         implementation files('libs/stage.jar')
+    } else {
+        implementation files('libs/prod.jar')
     }
     implementation 'androidx.appcompat:appcompat:1.3.1'
     implementation 'com.squareup.okhttp3:okhttp:4.10.0'
