@@ -31,7 +31,8 @@ apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 
 android {
-    compileSdkVersion 33
+    compileSdkVersion 34
+    namespace 'co.airhost.flutter_fincode'
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
