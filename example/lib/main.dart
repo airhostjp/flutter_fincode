@@ -143,7 +143,8 @@ class _MyAppState extends State<MyApp> {
                           label: const Text('Copy Card ID'),
                           icon: const Icon(Icons.paste_outlined),
                           onPressed: () async {
-                            await Clipboard.setData(ClipboardData(text: card.id));
+                            if (card.id == null) return;
+                            await Clipboard.setData(ClipboardData(text: card.id!));
                             if (!mounted) return;
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(

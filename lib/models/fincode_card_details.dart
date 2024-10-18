@@ -6,6 +6,8 @@ class FincodeCardDetails {
   String? holderName;
   String? securityCode;
   String? token;
+  String? threeDS2PhoneNo;
+  String? threeDS2Email;
 
   FincodeCardDetails({
     this.customerId,
@@ -15,6 +17,8 @@ class FincodeCardDetails {
     this.holderName,
     this.securityCode,
     this.token,
+    this.threeDS2PhoneNo,
+    this.threeDS2Email,
   });
 
   factory FincodeCardDetails.fromJson(Map<String, dynamic> json) {
@@ -26,6 +30,8 @@ class FincodeCardDetails {
       holderName: json['holderName'] as String?,
       securityCode: json['securityCode'] as String?,
       token: json['token'] as String?,
+      threeDS2PhoneNo: json['threeDS2PhoneNo'] as String?,
+      threeDS2Email: json['threeDS2Email'] as String?,
     );
   }
 
@@ -38,6 +44,8 @@ class FincodeCardDetails {
       'holderName': holderName,
       'securityCode': securityCode,
       'token': token,
+      'threeDS2PhoneNo': threeDS2PhoneNo,
+      'threeDS2Email': threeDS2Email,
     };
   }
 }
